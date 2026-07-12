@@ -27,14 +27,9 @@ Everything runs on **free tiers — no OpenAI/Anthropic keys, no credit card.** 
 
 ---
 
-## 🏴‍☠️ The landing & the hidden bridge
+## 🏴‍☠️ The landing
 
-The public site is a **cyberpunk-pirate "GH0ST CAPTAIN"** page — glitch title, 3D scrolling grid, CRT scanlines, a HUD-framed portrait, and a marquee ticker. There is **no visible login**; the app is private. To reach the bridge (`/login`):
-
-- **Desktop:** type **`fugu`** anywhere on the page 🥚
-- **Mobile:** **triple-tap the ☠ skull** (top-left of the HUD bar)
-
-The `/login` URL still works directly if you bookmark it. The public buttons ("Commission yer own ship" → deploy your own, "Read the code" → GitHub) never expose the app.
+The public site is a **cyberpunk-pirate "GH0ST CAPTAIN"** page — glitch title, 3D scrolling grid, CRT scanlines, a HUD-framed portrait, and a marquee ticker. There is **no visible login**: the app is private, reached through a hidden entrance the captain keeps to themselves. The public buttons ("Commission yer own ship" → deploy your own, "Read the code" → GitHub) never expose the app.
 
 ---
 

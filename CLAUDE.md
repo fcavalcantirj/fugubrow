@@ -17,10 +17,7 @@
 
 ### Landing page + hidden login
 - Public landing = a **cyberpunk-pirate "GH0ST CAPTAIN"** page (glitch title, 3D grid, CRT scanlines, HUD-framed portrait, ticker): `src/app/_components/landing-page.tsx` + `src/app/_components/pirate.css`; fonts Orbitron + JetBrains Mono (in `layout.tsx`); Captain photo `public/images/home-hero.jpg`.
-- **There is no visible login / Get-Started.** Access to `/login` is a hidden easter egg (`landing-page.tsx`):
-  - **Desktop:** type `fugu` anywhere on the page.
-  - **Mobile:** triple-tap the **☠ skull** (top-left of the HUD bar).
-  - The `/login` URL still works directly.
+- **There is no visible login / Get-Started.** Access to `/login` is a hidden client-side easter egg — see `SECRET` and `secretTap()` in `src/app/_components/landing-page.tsx` for the exact key sequence and tap target. The `/login` URL also works directly.
 - App icon = teal cyber skull-and-crossbones: `src/app/icon.png` (favicon), `src/app/apple-icon.png` (iOS), `public/icons/icon-{192,512}.png` + `src/app/manifest.ts` (PWA).
 
 ### Env / secrets

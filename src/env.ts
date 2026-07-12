@@ -1,0 +1,109 @@
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+const booleanString = z
+  .enum(["true", "false"])
+  .transform((value) => value === "true");
+
+export const env = createEnv({
+  server: {
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
+
+    // Better Auth
+    BETTER_AUTH_SECRET: z.string(),
+
+    // Composio API (global key)
+    COMPOSIO_API_KEY: z.string(),
+
+    // Sakana AI (fugu) — chat/agent model (OpenAI-compatible)
+    SAKANA_API_KEY: z.string(),
+    SAKANA_BASE_URL: z.string().url().default("https://api.sakana.ai/v1"),
+
+    // Jina — memory embeddings (OpenAI-compatible, jina-embeddings-v4, 1024 dims)
+    JINA_API_KEY: z.string(),
+    JINA_BASE_URL: z.string().url().default("https://api.jina.ai/v1"),
+
+    // Telegram bot (optional - Telegram features disabled when missing)
+    TELEGRAM_BOT_TOKEN: z.string().optional(),
+    TELEGRAM_BOT_USERNAME: z.string().optional(),
+    TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
+
+    // Database
+    DATABASE_URL: z.string().url(),
+
+    // Redis (optional - resumable streams disabled when missing; basic streaming still works)
+    REDIS_URL: z.string().optional(),
+
+    // Agent entrypoint rate limits
+    RATE_LIMIT_CHAT_PER_MINUTE: z.coerce.number().int().positive().default(20),
+    RATE_LIMIT_CHAT_PER_DAY: z.coerce.number().int().positive().default(500),
+    RATE_LIMIT_CRON_PER_DAY: z.coerce.number().int().positive().default(100),
+    RATE_LIMIT_TELEGRAM_PER_MINUTE: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(20),
+    RATE_LIMIT_FAIL_MODE: z.enum(["open", "closed"]),
+    RATE_LIMIT_ENABLED: booleanString.default("true"),
+
+    // Cron auth. Required in production so unauthenticated callers can't hit
+    // /api/cron/* endpoints. Vercel auto-injects this when crons are configured
+    // in vercel.json; the trustclaw deploy CLI also generates one on first deploy.
+    CRON_SECRET: z.string(),
+  },
+  client: {
+    NEXT_PUBLIC_APP_URL: z.string().url(),
+  },
+  runtimeEnv: {
+    // Server
+    NODE_ENV: process.env.NODE_ENV,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    COMPOSIO_API_KEY: process.env.COMPOSIO_API_KEY,
+    SAKANA_API_KEY: process.env.SAKANA_API_KEY,
+    SAKANA_BASE_URL: process.env.SAKANA_BASE_URL,
+    JINA_API_KEY: process.env.JINA_API_KEY,
+    JINA_BASE_URL: process.env.JINA_BASE_URL,
+    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    TELEGRAM_BOT_USERNAME: process.env.TELEGRAM_BOT_USERNAME,
+    TELEGRAM_WEBHOOK_SECRET: process.env.TELEGRAM_WEBHOOK_SECRET,
+    DATABASE_URL: process.env.DATABASE_URL,
+    REDIS_URL: process.env.REDIS_URL,
+    RATE_LIMIT_CHAT_PER_MINUTE: process.env.RATE_LIMIT_CHAT_PER_MINUTE,
+    RATE_LIMIT_CHAT_PER_DAY: process.env.RATE_LIMIT_CHAT_PER_DAY,
+    RATE_LIMIT_CRON_PER_DAY: process.env.RATE_LIMIT_CRON_PER_DAY,
+    RATE_LIMIT_TELEGRAM_PER_MINUTE:
+      process.env.RATE_LIMIT_TELEGRAM_PER_MINUTE,
+    RATE_LIMIT_FAIL_MODE:
+      process.env.RATE_LIMIT_FAIL_MODE ??
+      ((process.env.NODE_ENV ?? "development") === "development"
+        ? "open"
+        : "closed"),
+    RATE_LIMIT_ENABLED: process.env.RATE_LIMIT_ENABLED,
+    CRON_SECRET: process.env.CRON_SECRET,
+
+    // Client URL resolution:
+    //  - dev: derive from PORT so `PORT=3001 pnpm dev` just works
+    //  - prod with explicit override: use NEXT_PUBLIC_APP_URL
+    //  - on Vercel: fall back to the auto-injected canonical URL so self-hosters
+    //    don't need to set anything (VERCEL_PROJECT_PRODUCTION_URL is the
+    //    stable production domain; VERCEL_URL is the per-deployment URL)
+    NEXT_PUBLIC_APP_URL:
+      process.env.NODE_ENV === "development"
+        ? `http://localhost:${process.env.PORT ?? "3000"}`
+        : process.env.NEXT_PUBLIC_APP_URL ??
+          (process.env.VERCEL_PROJECT_PRODUCTION_URL
+            ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+            : process.env.VERCEL_URL
+              ? `https://${process.env.VERCEL_URL}`
+              : undefined),
+  },
+  // SKIP_ENV_VALIDATION is for local lint/typecheck without a full .env.
+  // Never honour it in production — security-critical secrets like
+  // CRON_SECRET and BETTER_AUTH_SECRET must always be present at runtime.
+  skipValidation:
+    !!process.env.SKIP_ENV_VALIDATION &&
+    process.env.NODE_ENV !== "production",
+  emptyStringAsUndefined: true,
+});

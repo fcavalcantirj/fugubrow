@@ -1,0 +1,43 @@
+{
+  "name": "@composio/trustclaw",
+  "version": "0.3.3",
+  "description": "One-command deploy for TrustClaw on Vercel",
+  "type": "module",
+  "bin": {
+    "trustclaw": "./dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/bin.ts",
+    "prepublishOnly": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ComposioHQ/trustclaw.git",
+    "directory": "cli"
+  },
+  "homepage": "https://github.com/ComposioHQ/trustclaw#readme",
+  "bugs": "https://github.com/ComposioHQ/trustclaw/issues",
+  "keywords": [
+    "trustclaw",
+    "composio",
+    "ai-agent",
+    "vercel",
+    "deploy"
+  ],
+  "author": "Composio <sarah@composio.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "@clack/prompts": "^1.3.0",
+    "commander": "^12.1.0",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

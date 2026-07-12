@@ -1,0 +1,467 @@
+/* ============ CYBER PIRATE — DEAD MAN'S PROTOCOL ============ */
+
+:root {
+  --cp-black: #020808;
+  --cp-cyan: #4de8d2;
+  --cp-cyan-dim: rgba(77, 232, 210, 0.35);
+  --cp-fog: #a8c8c2;
+  --cp-blood: #ff3b4e;
+}
+
+.cp-scene {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--cp-black);
+  color: var(--cp-fog);
+  font-family: var(--font-jetbrains), monospace;
+  perspective: 900px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cp-scene img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+
+/* ---------- 3D neon grid floor ---------- */
+.cp-grid {
+  position: absolute;
+  left: -50%;
+  bottom: -18%;
+  width: 200%;
+  height: 65%;
+  background-image: linear-gradient(var(--cp-cyan-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cp-cyan-dim) 1px, transparent 1px);
+  background-size: 56px 56px;
+  transform: rotateX(64deg);
+  transform-origin: center top;
+  animation: cp-grid-scroll 3.2s linear infinite;
+  mask-image: linear-gradient(to bottom, transparent, black 30%);
+}
+
+@keyframes cp-grid-scroll {
+  from {
+    background-position-y: 0;
+  }
+  to {
+    background-position-y: 56px;
+  }
+}
+
+/* horizon glow */
+.cp-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 42%;
+  height: 2px;
+  background: var(--cp-cyan);
+  opacity: 0.5;
+  box-shadow: 0 0 40px 6px var(--cp-cyan-dim), 0 0 120px 30px rgba(77, 232, 210, 0.15);
+}
+
+/* ---------- CRT overlays ---------- */
+.cp-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.28) 3px,
+    transparent 4px
+  );
+}
+
+.cp-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 41;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+.cp-flicker {
+  position: absolute;
+  inset: 0;
+  z-index: 42;
+  pointer-events: none;
+  background: rgba(77, 232, 210, 0.03);
+  animation: cp-flicker 4s steps(1) infinite;
+}
+
+@keyframes cp-flicker {
+  0%, 92%, 96%, 100% { opacity: 0; }
+  93%, 95% { opacity: 1; }
+}
+
+/* ---------- layout ---------- */
+.cp-content {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100dvh;
+  padding: 1rem 1.5rem;
+}
+
+.cp-main {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  min-height: 0;
+}
+
+@media (min-width: 900px) {
+  .cp-main {
+    flex-direction: row;
+    gap: 5rem;
+  }
+}
+
+/* ---------- top HUD bar ---------- */
+.cp-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cp-cyan);
+  border-bottom: 1px solid rgba(77, 232, 210, 0.2);
+  padding-bottom: 0.6rem;
+}
+
+.cp-topbar .cp-dim {
+  color: rgba(168, 200, 194, 0.55);
+}
+
+.cp-blink {
+  animation: cp-blink 1.2s steps(1) infinite;
+}
+
+@keyframes cp-blink {
+  50% { opacity: 0.15; }
+}
+
+/* ---------- glitch title ---------- */
+.cp-copy {
+  max-width: 34rem;
+  text-align: center;
+}
+
+@media (min-width: 900px) {
+  .cp-copy {
+    text-align: left;
+  }
+}
+
+.cp-kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--cp-blood);
+  margin-bottom: 0.75rem;
+}
+
+.cp-title {
+  font-family: var(--font-orbitron), sans-serif;
+  font-weight: 800;
+  font-size: clamp(2rem, 6vw, 4.2rem);
+  line-height: 1.02;
+  text-transform: uppercase;
+  color: #eafffb;
+  text-shadow: 0 0 18px rgba(77, 232, 210, 0.55), 0 0 60px rgba(77, 232, 210, 0.25);
+  position: relative;
+}
+
+.cp-title .cp-glitch {
+  position: relative;
+  display: inline-block;
+  color: var(--cp-cyan);
+}
+
+.cp-glitch::before,
+.cp-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cp-glitch::before {
+  color: var(--cp-blood);
+  clip-path: inset(20% 0 55% 0);
+  animation: cp-glitch-a 2.6s steps(2, jump-none) infinite;
+}
+
+.cp-glitch::after {
+  color: #ffffff;
+  clip-path: inset(60% 0 15% 0);
+  animation: cp-glitch-b 3.1s steps(2, jump-none) infinite;
+}
+
+@keyframes cp-glitch-a {
+  0%, 88%, 100% { transform: translate(0); opacity: 0; }
+  90% { transform: translate(-5px, 2px); opacity: 0.9; }
+  94% { transform: translate(4px, -1px); opacity: 0.9; }
+}
+
+@keyframes cp-glitch-b {
+  0%, 82%, 100% { transform: translate(0); opacity: 0; }
+  84% { transform: translate(5px, 1px); opacity: 0.8; }
+  88% { transform: translate(-4px, -2px); opacity: 0.8; }
+}
+
+.cp-sub {
+  margin-top: 1.1rem;
+  font-size: clamp(0.8rem, 1.4vw, 0.95rem);
+  line-height: 1.6;
+  color: rgba(168, 200, 194, 0.75);
+  text-wrap: pretty;
+}
+
+.cp-sub strong {
+  color: var(--cp-cyan);
+  font-weight: 600;
+}
+
+/* ---------- buttons ---------- */
+.cp-actions {
+  margin-top: 1.6rem;
+  display: flex;
+  gap: 0.9rem;
+  justify-content: center;
+}
+
+@media (min-width: 900px) {
+  .cp-actions {
+    justify-content: flex-start;
+  }
+}
+
+.cp-btn {
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.6rem;
+  border: 1px solid var(--cp-cyan);
+  color: var(--cp-cyan);
+  background: rgba(77, 232, 210, 0.06);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.cp-btn:hover,
+.cp-btn:focus-visible {
+  background: var(--cp-cyan);
+  color: var(--cp-black);
+  box-shadow: 0 0 30px rgba(77, 232, 210, 0.6);
+}
+
+.cp-btn--blood {
+  border-color: var(--cp-blood);
+  color: var(--cp-blood);
+  background: rgba(255, 59, 78, 0.06);
+}
+
+.cp-btn--blood:hover,
+.cp-btn--blood:focus-visible {
+  background: var(--cp-blood);
+  color: #ffffff;
+  box-shadow: 0 0 30px rgba(255, 59, 78, 0.55);
+}
+
+/* ---------- stats row ---------- */
+.cp-stats {
+  margin-top: 1.8rem;
+  display: flex;
+  gap: 2.2rem;
+  justify-content: center;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 900px) {
+  .cp-stats {
+    justify-content: flex-start;
+  }
+}
+
+.cp-stat b {
+  display: block;
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: 1.15rem;
+  color: var(--cp-cyan);
+  text-shadow: 0 0 12px rgba(77, 232, 210, 0.5);
+}
+
+.cp-stat span {
+  color: rgba(168, 200, 194, 0.5);
+}
+
+/* ---------- 3D portrait card ---------- */
+.cp-card-wrap {
+  perspective: 1000px;
+  flex-shrink: 0;
+}
+
+.cp-card {
+  position: relative;
+  width: clamp(200px, 30vw, 340px);
+  aspect-ratio: 3 / 4;
+  transform-style: preserve-3d;
+  transform: rotateY(-12deg) rotateX(4deg);
+  animation: cp-float 6s ease-in-out infinite;
+  transition: transform 0.5s ease;
+}
+
+.cp-card:hover {
+  transform: rotateY(0deg) rotateX(0deg) scale(1.03);
+}
+
+@keyframes cp-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -14px; }
+}
+
+.cp-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+  filter: saturate(1.15) contrast(1.05);
+}
+
+.cp-card-frame {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(77, 232, 210, 0.45);
+  box-shadow: 0 0 40px rgba(77, 232, 210, 0.25), inset 0 0 60px rgba(2, 8, 8, 0.6);
+}
+
+/* corner brackets */
+.cp-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--cp-cyan);
+  filter: drop-shadow(0 0 6px var(--cp-cyan));
+}
+
+.cp-corner--tl { top: -8px; left: -8px; border-right: 0; border-bottom: 0; }
+.cp-corner--tr { top: -8px; right: -8px; border-left: 0; border-bottom: 0; }
+.cp-corner--bl { bottom: -8px; left: -8px; border-right: 0; border-top: 0; }
+.cp-corner--br { bottom: -8px; right: -8px; border-left: 0; border-top: 0; }
+
+/* scan sweep over the portrait */
+.cp-card-scan {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cp-card-scan::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 22%;
+  background: linear-gradient(to bottom, transparent, rgba(77, 232, 210, 0.18), transparent);
+  animation: cp-scan 3.4s linear infinite;
+}
+
+@keyframes cp-scan {
+  from { top: -25%; }
+  to { top: 110%; }
+}
+
+.cp-card-tag {
+  position: absolute;
+  bottom: -2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--cp-blood);
+}
+
+/* ---------- bottom ticker ---------- */
+.cp-ticker {
+  overflow: hidden;
+  border-top: 1px solid rgba(77, 232, 210, 0.2);
+  padding-top: 0.6rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(77, 232, 210, 0.6);
+  white-space: nowrap;
+}
+
+.cp-ticker-track {
+  display: inline-block;
+  animation: cp-ticker 24s linear infinite;
+}
+
+@keyframes cp-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- hidden login easter egg hit area (the ☠ skull) ---------- */
+.cp-egg {
+  cursor: default;
+  padding: 8px;
+  margin: -8px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- mobile: fit one screen (no scroll), keep the 3D portrait ---------- */
+@media (max-width: 899px) {
+  .cp-content {
+    padding: 0.7rem 1.05rem 0.85rem;
+  }
+  .cp-topbar {
+    font-size: 0.46rem;
+    letter-spacing: 0.08em;
+    gap: 0.4rem;
+    padding-bottom: 0.45rem;
+  }
+  .cp-topbar span { white-space: nowrap; }
+  .cp-topbar .cp-dim { display: none; }
+  .cp-main {
+    gap: 2.4rem;
+    justify-content: center;
+  }
+  .cp-copy { max-width: 100%; }
+  .cp-kicker { margin-bottom: 0.35rem; font-size: 0.6rem; letter-spacing: 0.26em; }
+  .cp-title { font-size: clamp(1.85rem, 9.5vw, 2.5rem); }
+  .cp-sub { margin-top: 0.6rem; font-size: 0.76rem; line-height: 1.45; }
+  .cp-actions { margin-top: 0.9rem; gap: 0.55rem; flex-wrap: wrap; }
+  .cp-btn {
+    padding: 0.65rem 0.7rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    flex: 1 1 40%;
+    text-align: center;
+  }
+  .cp-stats { margin-top: 0.9rem; gap: 1.2rem; }
+  .cp-stat b { font-size: 0.95rem; }
+  .cp-card { width: min(44vw, 165px); }
+  .cp-card-tag { bottom: -1.35rem; font-size: 0.46rem; letter-spacing: 0.12em; }
+}

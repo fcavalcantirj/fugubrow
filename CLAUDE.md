@@ -2,7 +2,7 @@
 
 ## fuguBrow — what this repo is
 
-**fuguBrow** is a fork of [ComposioHQ/trustclaw](https://github.com/ComposioHQ/trustclaw) — a self-hostable 24/7 personal AI agent (web + Telegram, vector memory, 1000+ Composio tools, cron) — **re-wired to run on entirely free / no-credit-card providers** and dressed in a custom cyberpunk-pirate front end.
+**fuguBrow** is a fork of [ComposioHQ/trustclaw](https://github.com/ComposioHQ/trustclaw) — a self-hostable 24/7 personal AI agent (web + Telegram, vector memory, 1000+ Composio tools, cron) — **re-wired off the Vercel AI Gateway onto flat-rate providers** (Sakana fugu ~$10/mo flat subscription; Vercel **Pro**; Jina / Composio / Neon on free tiers) and dressed in a custom cyberpunk-pirate front end.
 
 **Live:** https://fugubrow.vercel.app · **Vercel:** project `fugubrow`, scope `felipecavalcanti-2709s-projects`
 

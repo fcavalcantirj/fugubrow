@@ -1,7 +1,7 @@
 # fuguBrow 🐡🏴‍☠️
 
 > Your rogue AI **first mate** — a 24/7 personal agent that plunders your busywork while you sleep.
-> A fork of [TrustClaw](https://github.com/ComposioHQ/trustclaw), re-wired to run on **entirely free, no-credit-card** providers.
+> A fork of [TrustClaw](https://github.com/ComposioHQ/trustclaw), re-wired off the Vercel AI Gateway onto **flat-rate providers** — no per-token LLM billing.
 
 **Live:** [fugubrow.vercel.app](https://fugubrow.vercel.app)
 
@@ -14,7 +14,7 @@
 
 ## What it is
 
-fuguBrow is a self-hostable 24/7 AI agent: chat on the **web or Telegram**, long-term **vector memory**, **1000+ tool integrations** via Composio (OAuth, sandboxed execution), and **cron-scheduled** autonomous runs. It's [TrustClaw](https://github.com/ComposioHQ/trustclaw) with its LLM + embedding layer swapped for **free, no-credit-card** providers:
+fuguBrow is a self-hostable 24/7 AI agent: chat on the **web or Telegram**, long-term **vector memory**, **1000+ tool integrations** via Composio (OAuth, sandboxed execution), and **cron-scheduled** autonomous runs. It's [TrustClaw](https://github.com/ComposioHQ/trustclaw) with its LLM + embedding layer swapped off the Vercel AI Gateway onto flat-rate providers:
 
 | Layer | fuguBrow runs on |
 |---|---|
@@ -23,7 +23,17 @@ fuguBrow is a self-hostable 24/7 AI agent: chat on the **web or Telegram**, long
 | **Tools** | Composio — OAuth, 1000+ apps |
 | **Database** | Neon Postgres + pgvector |
 
-Everything runs on **free tiers — no OpenAI/Anthropic keys, no credit card.** All model + embedding calls go through [`src/server/clients/model.ts`](src/server/clients/model.ts).
+No Vercel AI Gateway, no per-token OpenAI/Anthropic billing — all model + embedding calls go through [`src/server/clients/model.ts`](src/server/clients/model.ts).
+
+## Cost
+
+Predictable — no per-token / usage-metered LLM billing:
+
+| Service | Plan |
+|---|---|
+| Sakana **fugu** (chat) | flat **~$10/mo** API subscription |
+| Vercel (hosting) | **Pro** |
+| Jina (embeddings) · Composio (tools) · Neon (Postgres) | **free tiers** |
 
 ---
 

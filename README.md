@@ -121,6 +121,7 @@ Then message the bot `/start <token>` using the link token generated in Settings
 - **Sakana has no embeddings endpoint** — that's why memory uses Jina (Groq has none either).
 - **The rate limiter fails _closed_ without Redis** (prod default). Keep `RATE_LIMIT_ENABLED=false`, or add `REDIS_URL`. Symptom if wrong: every chat/Telegram message returns _"You're sending messages too quickly."_
 - **Neon free compute auto-suspends** → the first `prisma db push` may `P1001` on a cold start; just retry once it's warm.
+- **`maxDuration` must cover the whole agent loop, not the HTTP response.** The Telegram/chat/cron routes run the agent in a Vercel `after()` background task, but that task still dies at the route's `maxDuration`. It was `60`, while the loop allows `stepCountIs(100)` — a run doing several slow Composio remote-sandbox steps (~10s each) blew past 60s and got hard-killed mid-loop. On a hard kill nothing catches: `onFinish` (the only thing that persists the reply + sends the final message) never runs, so you get an empty assistant row, no answer, and the bot stuck on _"Working on it…"_ forever — and the next turn has no memory, so you re-ask in a loop. Fix: raise `maxDuration` (this project is Hobby but **Fluid Compute is on**, so 300s is allowed — check `resourceConfig.fluid`, not the plan name), add a wall-clock stop **under** the cap so `onFinish` always runs, and persist progress **incrementally each step** so a kill can never erase work.
 
 ---
 

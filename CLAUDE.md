@@ -38,6 +38,11 @@ vercel deploy --prod --yes --scope felipecavalcanti-2709s-projects
 - **Rate limiter fails *closed* without Redis** (prod default `RATE_LIMIT_FAIL_MODE=closed`) → keep `RATE_LIMIT_ENABLED=false` or add `REDIS_URL`. Symptom if wrong: every chat/Telegram message returns "You're sending messages too quickly."
 - **Neon free compute auto-suspends** → first `prisma db push` may `P1001` on a cold start; retry.
 
+### Git / GitHub account
+This is a **personal** repo: `github.com/fcavalcantirj/fugubrow`, owned by the personal account **`fcavalcantirj`** (`felipe.cavalcanti.rj@gmail.com`). The repo's git identity is already set to this personal account — commits are authored correctly by default; **do not** author commits as the work account (`fcavalcanti-onvida` / `dev@onvida.com.br`).
+- **Push must use the personal `fcavalcantirj` credential.** The machine's default GitHub credential (macOS keychain / active `gh` account) is the **work** account `fcavalcanti-onvida`, which has **no push access** here → a plain `git push` returns `403`.
+- **Do NOT use the `gh auth switch` / `gh auth git-credential` workaround** to push. Push with the personal account's own credential (its PAT stored for `github.com`, or a personal SSH remote). If the personal credential isn't available, commit and let Felipe push.
+
 ### Project links
 - Live app: https://fugubrow.vercel.app
 - Neon DB: https://console.neon.tech/app/projects/divine-frog-15918269/branches/br-misty-unit-at7vma6d

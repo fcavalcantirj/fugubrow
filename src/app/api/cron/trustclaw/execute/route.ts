@@ -8,6 +8,7 @@ import { prepareAgentRun } from "~/server/api/routers/trustclaw/agent/setup";
 import { computeNextRunSafe } from "~/server/api/routers/trustclaw/agent/tools/cron-utils";
 import { stripToolResultEchoes } from "~/server/api/routers/trustclaw/agent/strip-tool-echoes";
 import { rateLimit } from "~/server/clients/rate-limit";
+import { log } from "~/server/clients/logger";
 import { sendTelegramMessage } from "~/server/clients/telegram";
 import { executeJobInput, cronJobRow, type CronJobRow } from "./route.schema";
 
@@ -105,9 +106,22 @@ async function executeJobs(
       userMessageType: "hidden",
     });
 
-    const { agent, messages } = prepareResult.result;
+    const { agent, messages, runState } = prepareResult.result;
+
+    const startedAt = Date.now();
+    log.info("cron/execute", "run started", {
+      instanceId,
+      jobs: allowedJobs.length,
+    });
 
     const result = await agent.generate({ prompt: messages });
+
+    log.info("cron/execute", "run finished", {
+      instanceId,
+      jobs: allowedJobs.length,
+      timedOut: runState.timedOut,
+      elapsedMs: Date.now() - startedAt,
+    });
 
     // Release all job locks in a single query (each gets its own nextRunAt)
     await releaseJobLocks(allowedJobs, invocationId, now);
@@ -143,7 +157,9 @@ async function executeJobs(
   }
 }
 
-export const maxDuration = 60;
+// Vercel Fluid Compute ceiling on this plan; the agent enforces its own
+// ~260s wall-clock stop so it finalizes before this hard cap.
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   // Bearer-auth via CRON_SECRET (auto-injected by Vercel for cron-triggered

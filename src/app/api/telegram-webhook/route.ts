@@ -1,10 +1,15 @@
 import { timingSafeEqual } from "crypto";
 import { after, NextResponse } from "next/server";
+import type { StepResult, ToolSet } from "ai";
 import { env } from "~/env";
 import { db } from "~/server/clients/db";
 import { sendTelegramMessage, sendChatAction } from "~/server/clients/telegram";
 import { rateLimit } from "~/server/clients/rate-limit";
-import { prepareAgentRun } from "~/server/api/routers/trustclaw/agent/setup";
+import { log } from "~/server/clients/logger";
+import {
+  prepareAgentRun,
+  persistAssistantProgress,
+} from "~/server/api/routers/trustclaw/agent/setup";
 import { stripToolResultEchoes } from "~/server/api/routers/trustclaw/agent/strip-tool-echoes";
 import { toPlainRecordSafe } from "~/server/api/routers/trustclaw/agent/context/build-context";
 import { parseManageConnectionsResult } from "~/app/(authenticated)/dashboard/_components/tool-results/connections/schema";
@@ -52,10 +57,22 @@ function describeToolCall(tc: {
     return thought ?? "Working on it...";
   }
 
+  // Fall back to a toolkit-derived label (e.g. GITHUB_GET_A_REPOSITORY ->
+  // "Using GitHub...") instead of a generic "Working on it..." for every step.
+  const toolkit = name.split("_")[0];
+  if (toolkit && toolkit.length > 1) {
+    const pretty =
+      toolkit.charAt(0).toUpperCase() + toolkit.slice(1).toLowerCase();
+    return `Using ${pretty}...`;
+  }
+
   return "Working on it...";
 }
 
-export const maxDuration = 60;
+// Vercel Fluid Compute ceiling on this plan. Agent runs can take minutes
+// (many slow remote tool steps); the previous 60s cap killed long runs
+// mid-loop, so they never sent a final message or persisted their reply.
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_WEBHOOK_SECRET) {
@@ -186,9 +203,18 @@ async function handleRegularMessage(
     source: "telegram",
   });
 
-  const { agent, messages } = prepareResult.result;
+  const { agent, messages, assistantMessageId, runState } =
+    prepareResult.result;
+
+  const startedAt = Date.now();
+  log.info("telegram", "run started", {
+    instanceId: instance.id,
+    updateId,
+    chars: text.length,
+  });
 
   let accumulatedText = "";
+  const steps: StepResult<ToolSet>[] = [];
   const abortController = new AbortController();
 
   try {
@@ -202,6 +228,10 @@ async function handleRegularMessage(
           abortController.abort();
           return;
         }
+
+        // Persist progress so far so a function kill never loses the work.
+        steps.push(step);
+        await persistAssistantProgress(assistantMessageId, steps);
 
         // Send tool call descriptions (with results for connection URLs)
         for (let i = 0; i < step.toolCalls.length; i++) {
@@ -235,12 +265,46 @@ async function handleRegularMessage(
     } else if (!accumulatedText && !finalText) {
       await sendTelegramMessage(chatId, "I processed your request.");
     }
+
+    // If we stopped because we hit the time budget, tell the user so they can
+    // continue rather than assume the bot silently died.
+    if (runState.timedOut) {
+      await sendTelegramMessage(
+        chatId,
+        "⏱️ I hit my time limit for this turn and saved my progress. Say \"continue\" and I'll pick up where I left off.",
+      );
+    }
+
+    log.info("telegram", "run finished", {
+      instanceId: instance.id,
+      updateId,
+      steps: steps.length,
+      chars: accumulatedText.length + finalText.length,
+      timedOut: runState.timedOut,
+      elapsedMs: Date.now() - startedAt,
+    });
   } catch (error) {
     // If aborted by a newer message, send "-" to indicate truncation
     if (abortController.signal.aborted) {
+      log.info("telegram", "run superseded", {
+        instanceId: instance.id,
+        updateId,
+        steps: steps.length,
+        elapsedMs: Date.now() - startedAt,
+      });
       await sendTelegramMessage(chatId, "-");
       return;
     }
-    throw error;
+    log.error("telegram", "run failed", {
+      instanceId: instance.id,
+      updateId,
+      steps: steps.length,
+      elapsedMs: Date.now() - startedAt,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    await sendTelegramMessage(
+      chatId,
+      "⚠️ Something went wrong while I was working on that. Please try again.",
+    );
   }
 }

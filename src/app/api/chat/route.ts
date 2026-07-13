@@ -40,7 +40,9 @@ async function getAuthenticatedInstance(request: Request) {
   return { userId, instanceId: instance.id };
 }
 
-export const maxDuration = 60;
+// Vercel Fluid Compute ceiling on this plan; the agent enforces its own
+// ~260s wall-clock stop so it finalizes before this hard cap.
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   const authResult = await getAuthenticatedInstance(request);

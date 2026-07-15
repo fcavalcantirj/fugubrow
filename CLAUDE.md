@@ -52,8 +52,8 @@ Documented 2026-07-15 after debugging the "bot never finishes" bug, so the conte
 
 ### Git / GitHub account
 This is a **personal** repo: `github.com/fcavalcantirj/fugubrow`, owned by the personal account **`fcavalcantirj`** (`felipe.cavalcanti.rj@gmail.com`). The repo's git identity is already set to this personal account — commits are authored correctly by default; **do not** author commits as the work account (`fcavalcanti-onvida` / `dev@onvida.com.br`).
-- **Push must use the personal `fcavalcantirj` credential.** The machine's default GitHub credential (macOS keychain / active `gh` account) is the **work** account `fcavalcanti-onvida`, which has **no push access** here → a plain `git push` returns `403`.
-- **Do NOT use the `gh auth switch` / `gh auth git-credential` workaround** to push. Push with the personal account's own credential (its PAT stored for `github.com`, or a personal SSH remote). If the personal credential isn't available, commit and let Felipe push.
+- **`origin` is the personal SSH remote** (`git@github.com:fcavalcantirj/fugubrow.git`, set 2026-07-15). SSH authenticates as the personal account (verified `ssh -T git@github.com` → "Hi fcavalcantirj!"), so a plain **`git push` just works** as `fcavalcantirj` — no `gh`, no keychain.
+- **The HTTPS trap (don't go back):** over HTTPS the macOS keychain caches the **work** account `fcavalcanti-onvida`, which has **no push access** here → `git push` returns `403`. So do **not** switch `origin` back to the `https://` URL, and do **not** use the `gh auth switch` / `gh auth git-credential` workaround. Keep the SSH remote.
 
 ### Project links
 - Live app: https://fugubrow.vercel.app
